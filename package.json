@@ -1,0 +1,38 @@
+{
+  "name": "stickerify",
+  "version": "1.0.0",
+  "description": "Image->Sticker",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deanshub/stickerify.git"
+  },
+  "keywords": [
+    "telegram",
+    "sticker",
+    "background",
+    "image"
+  ],
+  "author": "Dean Shub",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deanshub/stickerify/issues"
+  },
+  "homepage": "https://github.com/deanshub/stickerify#readme",
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "resize-img": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^8.1.0",
+    "@types/node": "^13.9.0",
+    "@types/resize-img": "^1.1.0",
+    "typescript": "^3.8.3"
+  }
+}
