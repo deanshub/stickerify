@@ -69,44 +69,189 @@ function removeBg(imageName: string): Promise<Buffer> {
   });
 }
 
+let cb: null | Function;
+export function subscribeToMessages(bot: TelegramBot) {
+  bot.on("message", async msg => {
+    if (cb) {
+      return cb(msg);
+    }
+  });
+}
+
+function getMessage(): Promise<TelegramBot.Message> {
+  return new Promise((resolve, reject) => {
+    const getMessageTimeout = setTimeout(() => {
+      cb = null;
+      reject(new Error("Message not received in time"));
+    }, config.get("MESSAGE_RESULT_TIMEOUT"));
+    cb = (msg: TelegramBot.Message) => {
+      getMessageTimeout.unref();
+      cb = null;
+      resolve(msg);
+    };
+  });
+}
+
+let stickerMeassegeCallback:
+  | ((msg: TelegramBot.Message, outputImage: string) => void)
+  | null = null;
+async function onPhoto(bot: TelegramBot, msg: TelegramBot.Message) {
+  const chatId = msg.chat.id;
+  if (msg?.photo?.length ?? 0 > 0) {
+    const largetPhoto = msg.photo!.reduce((res, img) => {
+      if (img.width * img.height > res.width * res.height) {
+        return img;
+      }
+      return res;
+    }, msg.photo![0]);
+    const photo = await bot.getFile(largetPhoto.file_id);
+    const imageName = `${msg.chat.id}_${msg.message_id}.png`;
+    await download(
+      `https://api.telegram.org/file/bot${botToken}/${photo.file_path}`,
+      imageName
+    );
+    let outputImage = await get(imageName);
+    if (!outputImage) {
+      outputImage = path.join(outputDir, imageName);
+      console.log(`"${imageName}" not loaded from cache`);
+      const unbgImage = await removeBg(imageName);
+      await resize(imageName, unbgImage);
+      set(imageName);
+    }
+
+    // bot.sendPhoto(chatId, outputImage);
+    // bot.sendDocument(chatId, outputImage);
+    // bot.uploadStickerFile(msg.from?.id,)
+    if (stickerMeassegeCallback) {
+      stickerMeassegeCallback(msg, outputImage);
+    } else {
+      await bot.sendSticker(chatId, outputImage);
+    }
+  }
+}
+
+let clearMessageTimeoutId: NodeJS.Timeout;
+function getStickerMessage(): Promise<{
+  msg: TelegramBot.Message;
+  outputImage: string;
+}> {
+  return new Promise((resolve, reject) => {
+    clearMessageTimeoutId = setTimeout(() => {
+      reject("Sticker message timeout");
+      stickerMeassegeCallback = null;
+    }, config.get("MESSAGE_RESULT_TIMEOUT"));
+    stickerMeassegeCallback = (
+      msg: TelegramBot.Message,
+      outputImage: string
+    ) => {
+      // clearTimeout(clearMessageTimeoutId);
+      clearMessageTimeoutId.unref();
+      stickerMeassegeCallback = null;
+      resolve({ msg, outputImage });
+    };
+  });
+}
+
 function setupBot() {
   const bot = new TelegramBot(botToken, { polling: true });
+
+  subscribeToMessages(bot);
 
   bot.onText(/\/start/, msg => {
     const chatId = msg.chat.id;
 
-    bot.sendMessage(chatId, `Send me an image and I'll see what I can do`);
+    bot.sendMessage(chatId, `Start a new sticker pack by running /set`);
   });
 
-  bot.on("photo", async msg => {
+  bot.onText(/\/set/, async msg => {
     const chatId = msg.chat.id;
-    if (msg?.photo?.length ?? 0 > 0) {
-      const largetPhoto = msg.photo!.reduce((res, img) => {
-        if (img.width * img.height > res.width * res.height) {
-          return img;
-        }
-        return res;
-      }, msg.photo![0]);
-      const photo = await bot.getFile(largetPhoto.file_id);
-      const imageName = `${msg.chat.id}_${msg.message_id}.png`;
-      await download(
-        `https://api.telegram.org/file/bot${botToken}/${photo.file_path}`,
-        imageName
+    try {
+      const meMessage = await bot.getMe();
+
+      // name
+      await bot.sendMessage(
+        chatId,
+        `I'll create a new sticker set for you.
+  What do you want me to call it?`
       );
-      let outputImage = await get(imageName);
-      if (!outputImage) {
-        outputImage = path.join(outputDir, imageName);
-        console.log(`"${imageName}" not loaded from cache`);
-        const unbgImage = await removeBg(imageName);
-        await resize(imageName, unbgImage);
-        set(imageName);
+      const nameMessage = await getMessage();
+      const stickerSetName = `${nameMessage.text}_by_${meMessage.username}`;
+      let stickerSet;
+      stickerSet = await (bot as any)
+        .getStickerSet(stickerSetName)
+        .catch(() => undefined);
+
+      if (stickerSet) {
+        // emoji
+        await bot.sendMessage(chatId, "What emoji do you want to set?");
+        const emojiMessage = await getMessage();
+
+        // image
+        await bot.sendMessage(
+          chatId,
+          `Send me the image and I'll see what I can do`
+        );
+        const stickerMessage = await getStickerMessage();
+
+        const addedToStickerSetMessage = await (bot as any).addStickerToSet(
+          msg.from?.id,
+          stickerSetName,
+          stickerMessage.outputImage,
+          emojiMessage.text
+        );
+        if (addedToStickerSetMessage) {
+          stickerSet = await (bot as any).getStickerSet(stickerSetName);
+          const sticker = stickerSet.stickers.find(
+            (sticker: { emoji: string }) => sticker.emoji === emojiMessage.text
+          );
+          bot.sendSticker(chatId, sticker.file_id);
+        }
+      } else {
+        // title
+        await bot.sendMessage(chatId, "What do you want it's title to be?");
+        const titleMessage = await getMessage();
+
+        // emoji
+        await bot.sendMessage(chatId, "What emoji do you want to set?");
+        const emojiMessage = await getMessage();
+
+        // image
+        await bot.sendMessage(
+          chatId,
+          `Send me the image and I'll see what I can do`
+        );
+        const stickerMessage = await getStickerMessage();
+        const newStickerSetMessage = await (bot as any).createNewStickerSet(
+          msg.from?.id,
+          stickerSetName,
+          titleMessage.text,
+          stickerMessage.outputImage,
+          emojiMessage.text
+        );
+        if (newStickerSetMessage) {
+          stickerSet = await (bot as any).getStickerSet(stickerSetName);
+          const sticker = stickerSet.stickers.find(
+            (sticker: { emoji: string }) => sticker.emoji === emojiMessage.text
+          );
+          bot.sendSticker(chatId, sticker.file_id);
+        }
       }
-
-      bot.sendPhoto(chatId, outputImage);
-      bot.sendDocument(chatId, outputImage);
+    } catch (error) {
+      console.error(error);
+      bot.sendMessage(chatId, `Couldn't make you a sticker, I die now`);
     }
+  });
 
-    // console.log(msg);
+  bot.on("photo", msg => {
+    try {
+      return onPhoto(bot, msg);
+    } catch (e) {
+      console.error(e);
+      bot.sendMessage(
+        msg.chat.id,
+        `Couldn't transfor this photo to sticker, sorry`
+      );
+    }
   });
 }
 
