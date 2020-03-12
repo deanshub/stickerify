@@ -3,3 +3,5 @@ yarn-error.log
 dist
 input
 output
+config/production.json
+config/development.json
