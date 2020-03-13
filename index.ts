@@ -97,36 +97,38 @@ let stickerMeassegeCallback:
   | null = null;
 async function onPhoto(bot: TelegramBot, msg: TelegramBot.Message) {
   const chatId = msg.chat.id;
-  if (msg?.photo?.length ?? 0 > 0) {
-    const largetPhoto = msg.photo!.reduce((res, img) => {
-      if (img.width * img.height > res.width * res.height) {
-        return img;
+  try {
+    if (msg?.photo?.length ?? 0 > 0) {
+      const largetPhoto = msg.photo!.reduce((res, img) => {
+        if (img.width * img.height > res.width * res.height) {
+          return img;
+        }
+        return res;
+      }, msg.photo![0]);
+      const photo = await bot.getFile(largetPhoto.file_id);
+      const imageName = `${msg.chat.id}_${msg.message_id}.png`;
+      await download(
+        `https://api.telegram.org/file/bot${botToken}/${photo.file_path}`,
+        imageName
+      );
+      let outputImage = await get(imageName);
+      if (!outputImage) {
+        outputImage = path.join(outputDir, imageName);
+        console.log(`"${imageName}" not loaded from cache`);
+        const unbgImage = await removeBg(imageName);
+        await resize(imageName, unbgImage);
+        set(imageName);
       }
-      return res;
-    }, msg.photo![0]);
-    const photo = await bot.getFile(largetPhoto.file_id);
-    const imageName = `${msg.chat.id}_${msg.message_id}.png`;
-    await download(
-      `https://api.telegram.org/file/bot${botToken}/${photo.file_path}`,
-      imageName
-    );
-    let outputImage = await get(imageName);
-    if (!outputImage) {
-      outputImage = path.join(outputDir, imageName);
-      console.log(`"${imageName}" not loaded from cache`);
-      const unbgImage = await removeBg(imageName);
-      await resize(imageName, unbgImage);
-      set(imageName);
-    }
 
-    // bot.sendPhoto(chatId, outputImage);
-    // bot.sendDocument(chatId, outputImage);
-    // bot.uploadStickerFile(msg.from?.id,)
-    if (stickerMeassegeCallback) {
-      stickerMeassegeCallback(msg, outputImage);
-    } else {
-      await bot.sendSticker(chatId, outputImage);
+      if (stickerMeassegeCallback) {
+        stickerMeassegeCallback(msg, outputImage);
+      } else {
+        await bot.sendSticker(chatId, outputImage);
+      }
     }
+  } catch (e) {
+    console.error(e);
+    bot.sendMessage(chatId, `Couldn't transform this photo to sticker, sorry`);
   }
 }
 
@@ -242,17 +244,7 @@ function setupBot() {
     }
   });
 
-  bot.on("photo", msg => {
-    try {
-      return onPhoto(bot, msg);
-    } catch (e) {
-      console.error(e);
-      bot.sendMessage(
-        msg.chat.id,
-        `Couldn't transfor this photo to sticker, sorry`
-      );
-    }
-  });
+  bot.on("photo", msg => onPhoto(bot, msg));
 }
 
 init();
