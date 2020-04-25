@@ -6,10 +6,7 @@ import { srcDir, outputDir } from "./constants";
 const cache = new Map<string, string>();
 
 function hashIt(content: Buffer) {
-  return crypto
-    .createHash("md5")
-    .update(content)
-    .digest("hex");
+  return crypto.createHash("md5").update(content).digest("hex");
 }
 
 export async function set(imageName: string) {
@@ -27,7 +24,7 @@ export async function get(imageName: string) {
 export async function loadImageCache() {
   const [inputFiles, outputFiles] = await Promise.all([
     fs.readdir(srcDir),
-    fs.readdir(outputDir)
+    fs.readdir(outputDir),
   ]);
   return Promise.all(
     inputFiles.map((inFile: string) => {
