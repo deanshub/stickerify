@@ -1,4 +1,4 @@
-process.on("unhandledRejection", err => {
+process.on("unhandledRejection", (err) => {
   throw err;
 });
 
@@ -21,7 +21,7 @@ async function resize(
 ) {
   const image = await resizeImg(srcImage, {
     width,
-    height
+    height,
   });
 
   const outputImage = path.join(outputDir, imageName);
@@ -37,7 +37,7 @@ async function init() {
 
 function download(uri: string, filename: string) {
   return new Promise((resolve, reject) => {
-    request.head(uri, err => {
+    request.head(uri, (err) => {
       if (err) reject(err);
       request(uri)
         .pipe(fs.createWriteStream(path.join(srcDir, filename)))
@@ -53,14 +53,14 @@ function removeBg(imageName: string): Promise<Buffer> {
         url: "https://api.remove.bg/v1.0/removebg",
         formData: {
           image_file: fs.createReadStream(path.join(srcDir, imageName)),
-          size: "auto"
+          size: "auto",
         },
         headers: {
-          "X-Api-Key": config.get("REMOVE_BG_API_KEY")
+          "X-Api-Key": config.get("REMOVE_BG_API_KEY"),
         },
-        encoding: null
+        encoding: null,
       },
-      function(error, response, body) {
+      function (error, response, body) {
         if (error) return reject(error);
         if (response.statusCode != 200) return reject(response);
         resolve(body);
@@ -71,7 +71,7 @@ function removeBg(imageName: string): Promise<Buffer> {
 
 let cb: null | Function;
 export function subscribeToMessages(bot: TelegramBot) {
-  bot.on("message", async msg => {
+  bot.on("message", async (msg) => {
     if (cb) {
       return cb(msg);
     }
@@ -159,13 +159,13 @@ function setupBot() {
 
   subscribeToMessages(bot);
 
-  bot.onText(/\/start/, msg => {
+  bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
 
     bot.sendMessage(chatId, `Start a new sticker pack by running /set`);
   });
 
-  bot.onText(/\/set/, async msg => {
+  bot.onText(/\/set/, async (msg) => {
     const chatId = msg.chat.id;
     try {
       const meMessage = await bot.getMe();
@@ -244,7 +244,7 @@ function setupBot() {
     }
   });
 
-  bot.on("photo", msg => onPhoto(bot, msg));
+  bot.on("photo", (msg) => onPhoto(bot, msg));
 }
 
 init();
