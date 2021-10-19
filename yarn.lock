@@ -411,12 +411,12 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-config@^3.3.0:
-  version "3.3.0"
-  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/config/-/config-3.3.0.tgz#574deb6ff1438807b7ecf6dbad20dd32dd5655ab"
-  integrity sha1-V03rb/FDiAe37PbbrSDdMt1WVas=
+config@^3.3.6:
+  version "3.3.6"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/config/-/config-3.3.6.tgz#b87799db7399cc34988f55379b5f43465b1b065c"
+  integrity sha1-uHeZ23OZzDSYj1U3m19DRlsbBlw=
   dependencies:
-    json5 "^1.0.1"
+    json5 "^2.1.1"
 
 core-js@^2.5.7:
   version "2.6.11"
@@ -736,12 +736,12 @@ json-stringify-safe@~5.0.1:
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json5@^1.0.1:
-  version "1.0.1"
-  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/json5/-/json5-1.0.1.tgz#779fb0018604fa854eacbf6252180d83543e3dbe"
-  integrity sha1-d5+wAYYE+oVOrL9iUhgNg1Q+Pb4=
+json5@^2.1.1:
+  version "2.2.0"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/json5/-/json5-2.2.0.tgz#2dfefe720c6ba525d9ebd909950f0515316c89a3"
+  integrity sha1-Lf7+cgxrpSXZ69kJlQ8FFTFsiaM=
   dependencies:
-    minimist "^1.2.0"
+    minimist "^1.2.5"
 
 jsonfile@^4.0.0:
   version "4.0.0"
@@ -808,10 +808,10 @@ minimist@0.0.8:
   resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
   integrity sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
 
-minimist@^1.2.0:
-  version "1.2.4"
-  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/minimist/-/minimist-1.2.4.tgz#40357ef9582f8cd42ba8eaa274ddcf27f0c979b7"
-  integrity sha1-QDV++VgvjNQrqOqidN3PJ/DJebc=
+minimist@^1.2.5:
+  version "1.2.5"
+  resolved "https://repo.dev.wixpress.com/artifactory/api/npm/npm-repos/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
+  integrity sha1-Z9ZgFLZqaoqqDAg8X9WN9OTpdgI=
 
 mkdirp@0.5.1:
   version "0.5.1"
