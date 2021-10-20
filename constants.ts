@@ -1,2 +1,2 @@
-export const srcDir = "input";
-export const outputDir = "output";
+export const srcDir = 'input';
+export const outputDir = 'output';
