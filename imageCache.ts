@@ -1,12 +1,12 @@
-import crypto from "crypto";
-import fs from "fs-extra";
-import path from "path";
-import { srcDir, outputDir } from "./constants";
+import crypto from 'crypto';
+import fs from 'fs-extra';
+import path from 'path';
+import { srcDir, outputDir } from './constants';
 
 const cache = new Map<string, string>();
 
 function hashIt(content: Buffer) {
-  return crypto.createHash("md5").update(content).digest("hex");
+  return crypto.createHash('md5').update(content).digest('hex');
 }
 
 export async function set(imageName: string) {
@@ -32,6 +32,6 @@ export async function loadImageCache() {
       if (match) {
         return set(inFile);
       }
-    })
-  ).then(() => console.log("Cache loaded successfully"));
+    }),
+  ).then(() => console.log('Cache loaded successfully'));
 }
