@@ -27,13 +27,13 @@
   "homepage": "https://github.com/deanshub/stickerify#readme",
   "dependencies": {
     "config": "^3.3.0",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^10.0.0",
     "node-telegram-bot-api": "^0.40.0",
     "resize-img": "^2.0.0"
   },
   "devDependencies": {
     "@types/config": "^0.0.36",
-    "@types/fs-extra": "^8.1.0",
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "^13.9.0",
     "@types/node-telegram-bot-api": "^0.40.2",
     "@types/resize-img": "^1.1.0",
